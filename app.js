@@ -473,12 +473,34 @@ function syncAll(){
   $('#textEffect').value=settings.textEffect; $('#eventName').value=settings.eventName; $('#showDate').checked=settings.showDate;
   syncKeyControls(); syncLayoutControls();
 }
+const STEP_NAMES = {1:'撮る・取り込む',2:'抜く',3:'背景',4:'配置',5:'体力バー・文字',6:'保存'};
+let currentStep = 1;
+function goStep(n, scroll){
+  currentStep = Math.min(6, Math.max(1, n));
+  $$('#stepsNav button').forEach(b=>b.classList.toggle('active', b.dataset.step===String(currentStep)));
+  $$('.step-panel').forEach(p=>p.classList.toggle('hidden', p.dataset.panel!==String(currentStep)));
+  if(currentStep===2){ syncKeyControls(); drawSourcePreview(); }
+  const lbl=$('#stepBarLabel'); if(lbl) lbl.textContent = currentStep+' / 6 '+STEP_NAMES[currentStep];
+  const pv=$('#prevStepBtn'), nv=$('#nextStepBtn');
+  if(pv) pv.disabled = currentStep===1;
+  if(nv) nv.disabled = currentStep===6;
+  if(scroll){
+    const panel=$('.step-panel:not(.hidden)');
+    if(panel){
+      const pvWrap=$('.preview-wrap');
+      const offset = (pvWrap? pvWrap.offsetHeight:0) + 58;
+      const y = panel.getBoundingClientRect().top + window.scrollY - offset;
+      window.scrollTo({top: Math.max(0,y), behavior:'smooth'});
+    }
+  }
+}
 $('#stepsNav').addEventListener('click', e=>{
   const btn=e.target.closest('button[data-step]'); if(!btn) return;
-  $$('#stepsNav button').forEach(b=>b.classList.toggle('active',b===btn));
-  $$('.step-panel').forEach(p=>p.classList.toggle('hidden', p.dataset.panel!==btn.dataset.step));
-  if(btn.dataset.step==='2'){ syncKeyControls(); drawSourcePreview(); }
+  goStep(parseInt(btn.dataset.step,10), true);
 });
+$('#prevStepBtn').addEventListener('click', ()=>goStep(currentStep-1, true));
+$('#nextStepBtn').addEventListener('click', ()=>goStep(currentStep+1, true));
+goStep(1, false);
 $('#playerMode').addEventListener('change', e=>{ settings.mode=e.target.value; saveSettings(); renderMain(); });
 $('#aspect').addEventListener('change', e=>{ settings.aspect=e.target.value; saveSettings(); renderMain(); });
 $('#activePlayer').addEventListener('change', e=>{ settings.activePlayer=e.target.value; saveSettings(); syncKeyControls(); syncLayoutControls(); drawSourcePreview(); renderMain(); });

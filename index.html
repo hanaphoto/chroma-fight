@@ -21,34 +21,34 @@
   <section class="preview-wrap">
     <canvas id="mainCanvas" width="960" height="540"></canvas>
     <div id="countdown" class="countdown hidden"></div>
-    <div class="preview-tools">
-      <label>確認用背景
-        <select id="checkBg">
-          <option value="actual">実際の背景</option>
-          <option value="white">白</option>
-          <option value="black">黒</option>
-          <option value="gray">グレー</option>
-          <option value="checker">チェッカー</option>
-        </select>
-      </label>
-      <button id="beforeAfterBtn" type="button">抜く前を見る（押している間）</button>
-      <label><input type="checkbox" id="guideToggle"> ガイド表示</label>
-    </div>
-    <div class="live-wrap">
-      <h3>ライブプレビュー（低解像度）</h3>
-      <canvas id="liveCanvas" width="640" height="360"></canvas>
-      <video id="cameraVideo" playsinline muted class="hidden-video"></video>
-    </div>
   </section>
+  <div class="preview-tools">
+    <label>確認用背景
+      <select id="checkBg">
+        <option value="actual">実際の背景</option>
+        <option value="white">白</option>
+        <option value="black">黒</option>
+        <option value="gray">グレー</option>
+        <option value="checker">チェッカー</option>
+      </select>
+    </label>
+    <button id="beforeAfterBtn" type="button">抜く前を見る（押している間）</button>
+    <label class="check-label"><input type="checkbox" id="guideToggle"> ガイド表示</label>
+  </div>
+  <div class="live-wrap">
+    <h3>ライブプレビュー（低解像度）</h3>
+    <canvas id="liveCanvas" width="640" height="360"></canvas>
+    <video id="cameraVideo" playsinline muted class="hidden-video"></video>
+  </div>
 
   <!-- Step navigation -->
   <nav class="steps-nav" id="stepsNav">
-    <button data-step="1" class="active" type="button">1 撮る・取り込む</button>
-    <button data-step="2" type="button">2 抜く</button>
-    <button data-step="3" type="button">3 背景</button>
-    <button data-step="4" type="button">4 配置</button>
-    <button data-step="5" type="button">5 体力バー・文字</button>
-    <button data-step="6" type="button">6 保存</button>
+    <button data-step="1" class="active" type="button"><span class="s-num">1</span><span class="s-name">撮る・取り込む</span></button>
+    <button data-step="2" type="button"><span class="s-num">2</span><span class="s-name">抜く</span></button>
+    <button data-step="3" type="button"><span class="s-num">3</span><span class="s-name">背景</span></button>
+    <button data-step="4" type="button"><span class="s-num">4</span><span class="s-name">配置</span></button>
+    <button data-step="5" type="button"><span class="s-num">5</span><span class="s-name">体力バー・文字</span></button>
+    <button data-step="6" type="button"><span class="s-num">6</span><span class="s-name">保存</span></button>
   </nav>
 
   <!-- STEP 1 -->
@@ -233,6 +233,12 @@
 
   <p id="status" class="status"></p>
 </main>
+
+<div class="step-bar" id="stepBar">
+  <button id="prevStepBtn" type="button">← 前へ</button>
+  <span id="stepBarLabel">1 / 6</span>
+  <button id="nextStepBtn" type="button" class="primary">次へ →</button>
+</div>
 
 <div id="printArea"><img id="printImg" alt="合成写真（印刷用）"></div>
 
