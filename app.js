@@ -311,14 +311,20 @@ async function listCameras(){
     sel.value=cur;
   }catch(e){}
 }
+function updateLiveVisibility(){
+  const showLive = !!(liveOn && stream);
+  $('#liveCanvas').classList.toggle('hidden', !showLive);
+  $('#liveBadge').classList.toggle('hidden', !showLive);
+  $('#mainCanvas').classList.toggle('hidden', showLive);
+}
 async function startCamera(){
   stopCamera();
   const devId=$('#cameraSelect').value;
   const constraints={ video: devId? {deviceId:{exact:devId}, width:{ideal:1920}, height:{ideal:1080}} : {facingMode:facing, width:{ideal:1920}, height:{ideal:1080}}, audio:false };
-  try{ stream=await navigator.mediaDevices.getUserMedia(constraints); const v=$('#cameraVideo'); v.srcObject=stream; await v.play(); listCameras(); status('カメラ起動中'); if(liveOn) requestAnimationFrame(liveLoop); }
+  try{ stream=await navigator.mediaDevices.getUserMedia(constraints); const v=$('#cameraVideo'); v.srcObject=stream; await v.play(); listCameras(); status('カメラ起動中'); updateLiveVisibility(); if(liveOn) requestAnimationFrame(liveLoop); }
   catch(e){ status('カメラを起動できませんでした: '+e.message); }
 }
-function stopCamera(){ if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; } }
+function stopCamera(){ if(stream){ stream.getTracks().forEach(t=>t.stop()); stream=null; } updateLiveVisibility(); }
 function captureFrame(){
   const v=$('#cameraVideo'); if(!stream||!v.videoWidth) { status('カメラが起動していません'); return null; }
   const c=document.createElement('canvas'); c.width=v.videoWidth; c.height=v.videoHeight; c.getContext('2d').drawImage(v,0,0);
@@ -518,7 +524,7 @@ $('#refreshCameras').addEventListener('click', listCameras);
 $('#cameraSelect').addEventListener('change', ()=>{ if(stream) startCamera(); });
 $('#shootBtn').addEventListener('click', doShoot);
 $('#burstBtn').addEventListener('click', doBurst);
-$('#liveToggle').addEventListener('change', e=>{ liveOn=e.target.checked; if(liveOn){ if(!stream) startCamera(); else requestAnimationFrame(liveLoop); } });
+$('#liveToggle').addEventListener('change', e=>{ liveOn=e.target.checked; updateLiveVisibility(); if(liveOn){ if(!stream) startCamera(); else requestAnimationFrame(liveLoop); } });
 $('#clearPlayer').addEventListener('click', ()=>{ const k=settings.activePlayer; players[k].source=null; players[k].cutout=null; idbDelete('player:'+k); drawSourcePreview(); renderMain(); });
 
 $$('.key-preset').forEach(b=>b.addEventListener('click',()=>{ const k=settings.activePlayer; settings[k].keyColor=b.dataset.color; $('#keyColor').value=b.dataset.color; saveSettings(); reprocess(k); }));

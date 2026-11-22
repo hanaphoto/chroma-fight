@@ -20,6 +20,8 @@
   <!-- Preview -->
   <section class="preview-wrap">
     <canvas id="mainCanvas" width="960" height="540"></canvas>
+    <canvas id="liveCanvas" width="640" height="360" class="hidden"></canvas>
+    <div id="liveBadge" class="live-badge hidden">● LIVE 合成プレビュー</div>
     <div id="countdown" class="countdown hidden"></div>
   </section>
   <div class="preview-tools">
@@ -35,11 +37,7 @@
     <button id="beforeAfterBtn" type="button">抜く前を見る（押している間）</button>
     <label class="check-label"><input type="checkbox" id="guideToggle"> ガイド表示</label>
   </div>
-  <div class="live-wrap">
-    <h3>ライブプレビュー（低解像度）</h3>
-    <canvas id="liveCanvas" width="640" height="360"></canvas>
-    <video id="cameraVideo" playsinline muted class="hidden-video"></video>
-  </div>
+  <video id="cameraVideo" playsinline muted class="hidden-video"></video>
 
   <!-- Step navigation -->
   <nav class="steps-nav" id="stepsNav">
