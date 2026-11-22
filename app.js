@@ -316,6 +316,7 @@ function updateLiveVisibility(){
   $('#liveCanvas').classList.toggle('hidden', !showLive);
   $('#liveBadge').classList.toggle('hidden', !showLive);
   $('#mainCanvas').classList.toggle('hidden', showLive);
+  $('#liveControls').classList.toggle('hidden', !stream);
 }
 async function startCamera(){
   stopCamera();
@@ -524,6 +525,11 @@ $('#refreshCameras').addEventListener('click', listCameras);
 $('#cameraSelect').addEventListener('change', ()=>{ if(stream) startCamera(); });
 $('#shootBtn').addEventListener('click', doShoot);
 $('#burstBtn').addEventListener('click', doBurst);
+$('#shootBtn2').addEventListener('click', doShoot);
+$('#burstBtn2').addEventListener('click', doBurst);
+$('#switchBtn2').addEventListener('click', ()=>{ facing = facing==='environment'?'user':'environment'; if(stream) startCamera(); });
+$('#timerSec').addEventListener('change', e=>{ $('#timerSec2').value=e.target.value; });
+$('#timerSec2').addEventListener('change', e=>{ $('#timerSec').value=e.target.value; });
 $('#liveToggle').addEventListener('change', e=>{ liveOn=e.target.checked; updateLiveVisibility(); if(liveOn){ if(!stream) startCamera(); else requestAnimationFrame(liveLoop); } });
 $('#clearPlayer').addEventListener('click', ()=>{ const k=settings.activePlayer; players[k].source=null; players[k].cutout=null; idbDelete('player:'+k); drawSourcePreview(); renderMain(); });
 

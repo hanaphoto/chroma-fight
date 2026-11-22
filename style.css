@@ -17,6 +17,10 @@ main{max-width:1020px;margin:0 auto;padding:10px}
 .preview-tools button{flex:1 1 auto}
 #liveCanvas{width:auto;max-width:100%;height:auto;max-height:56vh;display:block;margin:0 auto;background:#222;border-radius:8px}
 .live-badge{position:absolute;top:14px;left:14px;background:rgba(180,20,40,.92);color:#fff;font-size:13px;font-weight:700;padding:5px 10px;border-radius:999px;pointer-events:none}
+.live-controls{display:flex;gap:8px;margin-top:8px;align-items:stretch}
+.live-controls select{width:auto;flex:none}
+.live-controls button{flex:1}
+.live-controls button.primary{flex:1.5;font-size:18px}
 
 /* Step navigation */
 .steps-nav{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin:12px 0}
@@ -81,6 +85,9 @@ input[type=file]{font-size:15px;min-height:48px;padding:10px 0;width:100%}
   .preview-wrap{top:46px;padding:6px;border-radius:10px}
   #mainCanvas{max-height:38vh}
   #liveCanvas{max-height:38vh}
+  .live-controls button{font-size:14px;padding:10px 6px}
+  .live-controls button.primary{font-size:16px}
+  .live-controls select{font-size:14px;padding:6px}
   .countdown{font-size:64px}
   .preview-tools{display:grid;grid-template-columns:1fr 1fr;font-size:13px}
   .preview-tools label:has(>select){grid-column:1/-1;justify-content:space-between}

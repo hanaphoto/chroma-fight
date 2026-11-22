@@ -23,6 +23,17 @@
     <canvas id="liveCanvas" width="640" height="360" class="hidden"></canvas>
     <div id="liveBadge" class="live-badge hidden">● LIVE 合成プレビュー</div>
     <div id="countdown" class="countdown hidden"></div>
+    <div id="liveControls" class="live-controls hidden">
+      <select id="timerSec2" aria-label="タイマー">
+        <option value="0">タイマーなし</option>
+        <option value="3">3秒</option>
+        <option value="5">5秒</option>
+        <option value="10">10秒</option>
+      </select>
+      <button id="shootBtn2" type="button" class="primary">📸 撮影</button>
+      <button id="burstBtn2" type="button">連写（3枚）</button>
+      <button id="switchBtn2" type="button">前/背面 切替</button>
+    </div>
   </section>
   <div class="preview-tools">
     <label>確認用背景
