@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>クロマファイト</title>
+<meta name="description" content="クロマキー合成で格闘ゲーム風の写真が撮れるWebアプリ。すべての処理は端末内で行います。">
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#b41428">
+<link rel="icon" href="icon-192.png">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="app-header">
+  <h1>🥊 クロマファイト</h1>
+  <a class="manual-link" href="manual.html">📖 説明書</a>
+</header>
+
+<main id="appMain">
+  <!-- Preview -->
+  <section class="preview-wrap">
+    <canvas id="mainCanvas" width="960" height="540"></canvas>
+    <div id="countdown" class="countdown hidden"></div>
+    <div class="preview-tools">
+      <label>確認用背景
+        <select id="checkBg">
+          <option value="actual">実際の背景</option>
+          <option value="white">白</option>
+          <option value="black">黒</option>
+          <option value="gray">グレー</option>
+          <option value="checker">チェッカー</option>
+        </select>
+      </label>
+      <button id="beforeAfterBtn" type="button">抜く前を見る（押している間）</button>
+      <label><input type="checkbox" id="guideToggle"> ガイド表示</label>
+    </div>
+    <div class="live-wrap">
+      <h3>ライブプレビュー（低解像度）</h3>
+      <canvas id="liveCanvas" width="640" height="360"></canvas>
+      <video id="cameraVideo" playsinline muted class="hidden-video"></video>
+    </div>
+  </section>
+
+  <!-- Step navigation -->
+  <nav class="steps-nav" id="stepsNav">
+    <button data-step="1" class="active" type="button">1 撮る・取り込む</button>
+    <button data-step="2" type="button">2 抜く</button>
+    <button data-step="3" type="button">3 背景</button>
+    <button data-step="4" type="button">4 配置</button>
+    <button data-step="5" type="button">5 体力バー・文字</button>
+    <button data-step="6" type="button">6 保存</button>
+  </nav>
+
+  <!-- STEP 1 -->
+  <section class="step-panel" data-panel="1">
+    <h2>1. 撮る・取り込む</h2>
+    <div class="row">
+      <label>人数
+        <select id="playerMode">
+          <option value="1">1人</option>
+          <option value="2-single">2人（一緒に1枚）</option>
+          <option value="2-separate">2人（別々に撮って合成）</option>
+        </select>
+      </label>
+      <label>画面比率
+        <select id="aspect">
+          <option value="16:9">16:9 横長</option>
+          <option value="4:3">4:3</option>
+          <option value="9:16">9:16 縦長</option>
+        </select>
+      </label>
+      <label>対象プレイヤー
+        <select id="activePlayer">
+          <option value="p1">プレイヤー1（左）</option>
+          <option value="p2">プレイヤー2（右）</option>
+        </select>
+      </label>
+    </div>
+    <fieldset>
+      <legend>カメラ</legend>
+      <div class="row">
+        <label>カメラ選択（PC向け一覧）
+          <select id="cameraSelect"><option value="">自動</option></select>
+        </label>
+        <button id="refreshCameras" type="button">カメラ一覧を更新</button>
+        <button id="startCamera" type="button">カメラ起動</button>
+        <button id="stopCamera" type="button">カメラ停止</button>
+        <button id="switchCamera" type="button">前/背面 切替（スマホ）</button>
+      </div>
+      <div class="row">
+        <label>タイマー
+          <select id="timerSec"><option value="0">なし</option><option value="3">3秒</option><option value="5">5秒</option><option value="10">10秒</option></select>
+        </label>
+        <button id="shootBtn" type="button" class="primary">📸 撮影</button>
+        <button id="burstBtn" type="button">連写（3枚）</button>
+        <label><input type="checkbox" id="liveToggle"> ライブ合成プレビュー</label>
+      </div>
+      <div id="burstThumbs" class="thumbs"></div>
+    </fieldset>
+    <fieldset>
+      <legend>写真を取り込む</legend>
+      <p class="hint">対象プレイヤーを選んでからファイルを選んでください。ブルー／グリーンバックで撮った写真がおすすめです。</p>
+      <input type="file" id="importFile" accept="image/*">
+      <button id="clearPlayer" type="button">対象プレイヤーの写真を消す</button>
+    </fieldset>
+  </section>
+
+  <!-- STEP 2 -->
+  <section class="step-panel hidden" data-panel="2">
+    <h2>2. 抜く（クロマキー）</h2>
+    <p class="hint">設定はプレイヤーごとに保存されます。対象プレイヤー：<strong id="keyTargetLabel">プレイヤー1</strong></p>
+    <div class="row">
+      <button class="key-preset" data-color="#0057ff" type="button">ブルー</button>
+      <button class="key-preset" data-color="#00b140" type="button">グリーン</button>
+      <label>キー色 <input type="color" id="keyColor" value="#00b140"></label>
+      <button id="eyedropperBtn" type="button">スポイト（ONにして写真をタップ）</button>
+    </div>
+    <canvas id="sourceCanvas" width="480" height="270" class="source-canvas"></canvas>
+    <p class="hint">スポイトONのとき上の元写真をタップすると、その色をキー色にします。</p>
+    <label class="slider">抜く強さ（しきい値） <span id="thresholdVal"></span>
+      <input type="range" id="threshold" min="0" max="100" value="38">
+    </label>
+    <label class="slider">境界のなめらかさ（フェザー） <span id="featherVal"></span>
+      <input type="range" id="feather" min="0" max="100" value="28">
+    </label>
+    <label class="slider">色かぶり除去（スピル） <span id="spillVal"></span>
+      <input type="range" id="spill" min="0" max="100" value="50">
+    </label>
+    <button id="reprocessBtn" type="button" class="primary">抜き直す</button>
+    <div class="tips">
+      <strong>きれいに抜くコツ：</strong> 背景にシワを作らない／人物は背景から離れる／均等な光を当てる／キー色と同系色の服・小物は避ける。
+    </div>
+  </section>
+
+  <!-- STEP 3 -->
+  <section class="step-panel hidden" data-panel="3">
+    <h2>3. 背景</h2>
+    <div id="bgList" class="bg-list"></div>
+    <fieldset>
+      <legend>自分の背景を追加（端末内のみ保存）</legend>
+      <input type="file" id="bgFile" accept="image/*">
+      <div id="customBgList" class="bg-list"></div>
+    </fieldset>
+  </section>
+
+  <!-- STEP 4 -->
+  <section class="step-panel hidden" data-panel="4">
+    <h2>4. 配置</h2>
+    <p class="hint">プレビュー画面で人物をドラッグして移動、ピンチで拡大縮小できます。対象プレイヤーを選んでスライダーでも調整できます。</p>
+    <label class="slider">大きさ <span id="scaleVal"></span>
+      <input type="range" id="scaleRange" min="20" max="250" value="90">
+    </label>
+    <label class="slider">左右位置 <span id="xVal"></span>
+      <input type="range" id="xRange" min="0" max="100" value="50">
+    </label>
+    <label class="slider">上下位置 <span id="yVal"></span>
+      <input type="range" id="yRange" min="0" max="100" value="58">
+    </label>
+    <div class="row">
+      <button id="flipBtn" type="button">左右反転</button>
+      <label><input type="checkbox" id="lockToggle"> レイヤーをロック</label>
+      <button id="resetLayoutBtn" type="button">配置リセット</button>
+    </div>
+  </section>
+
+  <!-- STEP 5 -->
+  <section class="step-panel hidden" data-panel="5">
+    <h2>5. 体力バー・文字</h2>
+    <div class="row">
+      <label>体力バーのスタイル
+        <select id="hudStyle">
+          <option value="classic">クラシック（斜め・グラデーション）</option>
+          <option value="simple">シンプル（角丸）</option>
+          <option value="neon">ネオン</option>
+        </select>
+      </label>
+      <label>タイマー（手動） <input type="number" id="timerValue" min="0" max="99" value="99" class="small-num"></label>
+      <label><input type="checkbox" id="koToggle"> K.O.表示</label>
+    </div>
+    <fieldset><legend>プレイヤー1</legend>
+      <div class="row">
+        <label>名前 <input type="text" id="p1Name" value="PLAYER 1" maxlength="16"></label>
+        <label class="slider grow">体力 <span id="p1HealthVal"></span><input type="range" id="p1Health" min="0" max="100" value="100"></label>
+      </div>
+    </fieldset>
+    <fieldset><legend>プレイヤー2</legend>
+      <div class="row">
+        <label>名前 <input type="text" id="p2Name" value="PLAYER 2" maxlength="16"></label>
+        <label class="slider grow">体力 <span id="p2HealthVal"></span><input type="range" id="p2Health" min="0" max="100" value="100"></label>
+      </div>
+    </fieldset>
+    <div class="row">
+      <label>文字演出
+        <select id="textEffect">
+          <option value="none">なし</option>
+          <option value="FIGHT!">FIGHT!</option>
+          <option value="K.O.">K.O.</option>
+          <option value="VS">VS</option>
+          <option value="ROUND 1">ROUND 1</option>
+        </select>
+      </label>
+      <label>イベント名 <input type="text" id="eventName" placeholder="例：文化祭 2026" maxlength="40"></label>
+      <label><input type="checkbox" id="showDate" checked> 日付を入れる</label>
+    </div>
+  </section>
+
+  <!-- STEP 6 -->
+  <section class="step-panel hidden" data-panel="6">
+    <h2>6. 保存</h2>
+    <div class="row">
+      <label>解像度
+        <select id="outRes">
+          <option value="high">高画質（元写真基準）</option>
+          <option value="light">軽量（長辺1280px）</option>
+        </select>
+      </label>
+    </div>
+    <div class="row">
+      <button id="dlComposite" type="button" class="primary">合成写真をダウンロード（JPEG）</button>
+      <button id="dlOriginal" type="button">元写真をダウンロード</button>
+      <button id="dlCutout" type="button">抜き画像をダウンロード（PNG）</button>
+      <button id="printBtn" type="button">🖨 印刷</button>
+    </div>
+    <fieldset>
+      <legend>設定の書き出し／読み込み</legend>
+      <div class="row">
+        <button id="exportSettings" type="button">設定を書き出す（JSON）</button>
+        <label class="file-label">設定を読み込む <input type="file" id="importSettings" accept="application/json"></label>
+      </div>
+      <p class="hint">書き出しは設定のみです（画像は含まれません）。追加した背景画像はこの端末のIndexedDBに保存されています。</p>
+    </fieldset>
+  </section>
+
+  <p id="status" class="status"></p>
+</main>
+
+<div id="printArea"><img id="printImg" alt="合成写真（印刷用）"></div>
+
+<script src="app.js"></script>
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function(){ navigator.serviceWorker.register('service-worker.js').catch(function(){}); });
+}
+</script>
+</body>
+</html>

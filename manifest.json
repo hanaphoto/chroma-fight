@@ -1,0 +1,1 @@
+{"background_color":"#14141c","description":"クロマキー合成で格闘ゲーム風の写真が撮れるWebアプリ","display":"standalone","icons":[{"sizes":"192x192","src":"icon-192.png","type":"image/png"},{"sizes":"512x512","src":"icon-512.png","type":"image/png"}],"name":"クロマファイト","scope":"./","short_name":"クロマファイト","start_url":"./index.html","theme_color":"#b41428"}
